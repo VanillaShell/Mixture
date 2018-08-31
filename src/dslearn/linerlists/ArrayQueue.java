@@ -6,21 +6,41 @@ import java.util.Queue;
 
 /*
  * 逻辑上的环形数组
+ *  采用少使用一个储存单元的设计
  */
 public class ArrayQueue<E> implements Queue<E>{
 	
-	private int front = 0, rear = 0;
+	private static final int default_init_capacity = 10;
+	
+	private Object[] elements;
+	
+	private int front, rear;
+	
+	public ArrayQueue() {
+		this(default_init_capacity);
+	}
+	
+	public ArrayQueue(int capacity) {
+		if(capacity < 0) {
+			capacity = default_init_capacity;
+		}
+		//对外表现的空间+内部实现需要的1个不使用的空间
+		elements = new Object[capacity+1];
+		front = rear = 0;
+	}
 
 	@Override
 	public int size() {
-		// TODO Auto-generated method stub
-		return 0;
+		return (rear - front + elements.length)%elements.length;
 	}
 
 	@Override
 	public boolean isEmpty() {
-		// TODO Auto-generated method stub
-		return false;
+		return front == rear;
+	}
+	
+	public boolean isFull() {
+		return (rear + 1) % elements.length == front;
 	}
 
 	@Override
@@ -79,8 +99,7 @@ public class ArrayQueue<E> implements Queue<E>{
 
 	@Override
 	public void clear() {
-		// TODO Auto-generated method stub
-		
+		front = rear = 0;
 	}
 
 	@Override
@@ -91,8 +110,10 @@ public class ArrayQueue<E> implements Queue<E>{
 
 	@Override
 	public boolean offer(E e) {
-		// TODO Auto-generated method stub
-		return false;
+		if(isFull()) return false;
+		elements[rear] = e;
+		rear = (rear + 1) % elements.length;
+		return true;
 	}
 
 	@Override
@@ -101,10 +122,13 @@ public class ArrayQueue<E> implements Queue<E>{
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public E poll() {
-		// TODO Auto-generated method stub
-		return null;
+		if(isEmpty()) return null;
+		E e = (E) elements[front];
+		front = (front + 1) % elements.length;
+		return e;
 	}
 
 	@Override
@@ -113,10 +137,11 @@ public class ArrayQueue<E> implements Queue<E>{
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public E peek() {
-		// TODO Auto-generated method stub
-		return null;
+		if(isEmpty()) return null;
+		return (E) elements[front];
 	}
 
 }
